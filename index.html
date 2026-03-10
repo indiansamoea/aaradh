@@ -74,6 +74,31 @@
         .pricing-toggle .slider::before { content: ''; position: absolute; width: 22px; height: 22px; border-radius: 50%; background: white; top: 3px; left: 3px; transition: 0.3s; }
         .pricing-toggle input:checked + .slider::before { transform: translateX(24px); }
     </style>
+    <style>
+.terms-btn-container{
+    text-align:center;
+    margin:40px 0;
+}
+
+.terms-btn{
+    padding:14px 28px;
+    font-size:16px;
+    font-weight:600;
+    color:white;
+    background: linear-gradient(135deg,#0ea5e9,#6366f1);
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    text-decoration:none;
+    box-shadow:0 0 10px rgba(99,102,241,0.6);
+    transition:all 0.3s ease;
+}
+
+.terms-btn:hover{
+    transform:scale(1.08);
+    box-shadow:0 0 25px rgba(99,102,241,0.9);
+}
+</style>
 </head>
 <body class="bg-surface text-white font-sans antialiased selection:bg-primary/30 selection:text-white overflow-x-hidden">
 
@@ -1093,5 +1118,13 @@
             });
         });
     </script>
+    <div class="terms-btn-container">
+    <a href="https://drive.google.com/file/d/1TqkacK49nD_5RDjstvFr2rKJxHKXn8lG/view?usp=drivesdk" 
+       target="_blank" 
+       class="terms-btn">
+       📄 View Terms & Conditions
+    </a>
+</div>
 </body>
 </html>
+

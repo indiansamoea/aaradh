@@ -1,416 +1,455 @@
-import React, { useState } from 'react';
-
-// --- Data ---
-const WA_NUMBER = "917764812598";
-
-const generateWaLink = (message) => {
-  return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`;
-};
-
-const industries = [
-  {
-    id: 'schools', icon: '🏫', title: 'Schools',
-    plans: [
-      { name: 'Starter', price: '₹2,999', features: ['4 pages (Home, About, Admissions, Contact)', 'Photo gallery', 'WhatsApp contact', 'Google Maps'] },
-      { name: 'Standard', price: '₹5,999', features: ['6–8 pages', 'Admission form', 'Notice board', 'Event gallery'], popular: true },
-      { name: 'Premium', price: '₹9,999', features: ['Online admission form', 'Result section', 'Blog/news updates', '6 months support'] },
-    ]
-  },
-  {
-    id: 'coaching', icon: '📚', title: 'Coaching Institutes',
-    plans: [
-      { name: 'Starter', price: '₹1,999', features: ['Single page website', 'Course details', 'WhatsApp enquiry'] },
-      { name: 'Standard', price: '₹4,999', features: ['4 pages', 'Course pages', 'Student results section', 'Enquiry form'], popular: true },
-      { name: 'Premium', price: '₹7,999', features: ['Online registration form', 'Testimonials', 'SEO optimization'] },
-    ]
-  },
-  {
-    id: 'restaurants', icon: '🍽️', title: 'Restaurants',
-    plans: [
-      { name: 'Starter', price: '₹2,499', features: ['Digital menu', 'Food gallery', 'WhatsApp order button'] },
-      { name: 'Standard', price: '₹4,999', features: ['5 pages', 'Menu page', 'Table reservation form'], popular: true },
-      { name: 'Premium', price: '₹8,999', features: ['Online ordering system', 'Offers & promotions page'] },
-    ]
-  },
-  {
-    id: 'cafes', icon: '☕', title: 'Cafes',
-    plans: [
-      { name: 'Starter', price: '₹2,999', features: ['Menu page', 'Instagram link', 'Gallery'] },
-      { name: 'Standard', price: '₹5,999', features: ['Table reservation', 'Instagram feed', 'SEO setup'], popular: true },
-      { name: 'Premium', price: '₹9,999', features: ['Online ordering', 'Event section'] },
-    ]
-  },
-  {
-    id: 'hotels', icon: '🏨', title: 'Hotels / Guest Houses',
-    plans: [
-      { name: 'Starter', price: '₹3,999', features: ['Room details', 'Photo gallery', 'WhatsApp booking'] },
-      { name: 'Standard', price: '₹7,999', features: ['Room pages', 'Booking enquiry form'], popular: true },
-      { name: 'Premium', price: '₹12,999', features: ['Online booking system', 'Offers page'] },
-    ]
-  },
-  {
-    id: 'medical', icon: '⚕️', title: 'Medical Clinics',
-    plans: [
-      { name: 'Starter', price: '₹2,999', features: ['Doctor profile', 'Services page', 'WhatsApp appointment'] },
-      { name: 'Standard', price: '₹5,999', features: ['Appointment form', 'Patient reviews'], popular: true },
-      { name: 'Premium', price: '₹9,999', features: ['Multiple doctors section', 'Blog for health tips'] },
-    ]
-  },
-  {
-    id: 'services', icon: '🔧', title: 'Local Services',
-    plans: [
-      { name: 'Starter', price: '₹1,499', features: ['Single page', 'Service list', 'Call button'] },
-      { name: 'Standard', price: '₹2,999', features: ['Service pages', 'Enquiry form'], popular: true },
-      { name: 'Premium', price: '₹4,999', features: ['Booking form', 'SEO setup'] },
-    ]
-  },
-  {
-    id: 'tutors', icon: '👨‍🏫', title: 'Home Tutors',
-    plans: [
-      { name: 'Starter', price: '₹1,999', features: ['Tutor profile', 'Subjects taught', 'WhatsApp contact'] },
-      { name: 'Standard', price: '₹3,999', features: ['Student results', 'Demo class booking'], popular: true },
-      { name: 'Premium', price: '₹6,999', features: ['Blog section', 'Testimonials'] },
-    ]
-  },
-  {
-    id: 'gyms', icon: '🏋️‍♂️', title: 'Gyms / Fitness',
-    plans: [
-      { name: 'Starter', price: '₹2,499', features: ['Trainer profile', 'Membership plans'] },
-      { name: 'Standard', price: '₹4,999', features: ['Workout programs', 'Contact form'], popular: true },
-      { name: 'Premium', price: '₹7,999', features: ['Online class booking'] },
-    ]
-  },
-  {
-    id: 'salons', icon: '✂️', title: 'Beauty Parlours / Salons',
-    plans: [
-      { name: 'Starter', price: '₹2,499', features: ['Services list', 'Photo gallery'] },
-      { name: 'Standard', price: '₹4,999', features: ['Appointment booking', 'Offers page'], popular: true },
-      { name: 'Premium', price: '₹7,999', features: ['Online booking system'] },
-    ]
-  },
-  {
-    id: 'realestate', icon: '🏠', title: 'Real Estate Agents',
-    plans: [
-      { name: 'Starter', price: '₹3,999', features: ['Property listing page'] },
-      { name: 'Standard', price: '₹6,999', features: ['Property gallery', 'Enquiry forms'], popular: true },
-      { name: 'Premium', price: '₹10,999', features: ['Advanced property listings'] },
-    ]
-  },
-  {
-    id: 'retail', icon: '🛍️', title: 'Retail Shops',
-    plans: [
-      { name: 'Starter', price: '₹2,499', features: ['Product showcase'] },
-      { name: 'Standard', price: '₹4,999', features: ['Product categories'], popular: true },
-      { name: 'Premium', price: '₹8,999', features: ['Simple online ordering'] },
-    ]
-  }
-];
-
-const addons = [
-  { name: 'Google Business Profile Setup', price: '₹499', icon: '📍' },
-  { name: 'Logo Design', price: '₹999', icon: '🎨' },
-  { name: 'Domain Setup', price: '₹299', icon: '🌐' },
-  { name: 'SEO Setup', price: '₹999', icon: '🚀' },
-];
-
-export default function AaradhWeb() {
-  const [activeTab, setActiveTab] = useState(industries[0]);
-
-  return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
-      
-      {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-2 rounded-lg font-bold text-xl leading-none shadow-[0_0_10px_rgba(79,70,229,0.5)]">AW</div>
-            <span className="font-bold text-xl text-slate-900 tracking-tight">Aaradh Web</span>
-          </div>
-          <a 
-            href={generateWaLink("Hi Aaradh Web, I want to build a website for my business.")}
-            target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white px-4 py-2 rounded-full font-medium transition-all shadow-[0_0_15px_rgba(34,197,94,0.4)] text-sm sm:text-base"
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            Contact Us
-          </a>
-        </div>
-      </nav>
-
-      {/* Hero Section with Glowing Glass Effects */}
-      <div className="relative bg-slate-950 text-white py-20 sm:py-32 overflow-hidden">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aaradh Web | Premium Website Packages</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- GSAP for Professional Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
-        {/* Animated Background Orbs for Glass Reflection */}
-        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-50 animate-blob"></div>
-        <div className="absolute top-[20%] right-[-10%] w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-50 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-[-20%] left-[20%] w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-50 animate-blob animation-delay-4000"></div>
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight mb-8">
-            Grow Your Local Business <br className="hidden sm:block" />
-            {/* Moving Glowing Text */}
-            <span className="glowing-text-animated mt-2 inline-block">With a Stunning Website</span>
-          </h1>
-          
-          {/* Glowing Glass Quote Box */}
-          <div className="max-w-3xl mx-auto glass-glow-wrapper mb-12">
-            <div className="glass-panel rounded-2xl p-8 shadow-2xl">
-              <p className="text-xl sm:text-2xl font-medium leading-relaxed italic text-white drop-shadow-md">
-                "Big companies charge ₹20,000–₹50,000 for a website. <br className="hidden sm:block"/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500 font-bold drop-shadow-[0_0_8px_rgba(253,224,71,0.5)]">
-                  I provide premium, affordable websites for local businesses starting from just ₹2,999.
-                </span>"
-              </p>
-            </div>
-          </div>
-
-          <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto font-medium">
-            Select your business type below to see our transparent, low-cost pricing packages designed perfectly for your needs.
-          </p>
-        </div>
-      </div>
-
-      {/* Main Pricing Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">Choose Your Business Type</h2>
-          <p className="text-slate-600">Click on a category to view customized pricing plans.</p>
-        </div>
-
-        {/* Industry Tabs (Horizontal Scroll on Mobile) */}
-        <div className="flex overflow-x-auto pb-4 mb-8 hide-scrollbar gap-2 snap-x">
-          {industries.map((ind) => (
-            <button
-              key={ind.id}
-              onClick={() => setActiveTab(ind)}
-              className={`flex-none snap-start px-5 py-3 rounded-xl flex items-center gap-2 font-medium transition-all duration-200 border-2 ${
-                activeTab.id === ind.id 
-                  ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm' 
-                  : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:bg-slate-50'
-              }`}
-            >
-              <span className="text-xl">{ind.icon}</span>
-              {ind.title}
-            </button>
-          ))}
-        </div>
-
-        {/* Pricing Cards for Active Tab */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-lg border border-slate-100 relative">
-          <div className="text-center mb-10">
-            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 flex justify-center items-center gap-3">
-              <span className="text-3xl">{activeTab.icon}</span>
-              Pricing for {activeTab.title}
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {activeTab.plans.map((plan, idx) => (
-              <div 
-                key={idx} 
-                className={`relative flex flex-col bg-white rounded-2xl border-2 transition-transform duration-300 hover:-translate-y-1 ${
-                  plan.popular ? 'border-blue-600 shadow-[0_10px_30px_rgba(37,99,235,0.2)]' : 'border-slate-200 shadow-md'
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-1 rounded-full text-sm font-bold tracking-wide shadow-lg">
-                    MOST POPULAR
-                  </div>
-                )}
-                
-                <div className="p-6 sm:p-8 flex-1">
-                  <h4 className="text-xl font-bold text-slate-900 mb-2">{plan.name}</h4>
-                  <div className="flex items-baseline gap-1 mb-6">
-                    <span className="text-4xl font-extrabold text-slate-900">{plan.price}</span>
-                  </div>
-                  
-                  <ul className="space-y-4 mb-8">
-                    {plan.features.map((feature, fIdx) => (
-                      <li key={fIdx} className="flex items-start gap-3 text-slate-700">
-                        <svg className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <div className="p-6 pt-0 mt-auto">
-                  <a 
-                    href={generateWaLink(`Hi Aaradh Web, I am interested in the ${plan.name} Plan (${plan.price}) for my ${activeTab.title} business. Please share more details.`)}
-                    target="_blank" rel="noopener noreferrer"
-                    className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-bold text-center transition-all ${
-                      plan.popular 
-                        ? 'bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white shadow-lg' 
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
-                    }`}
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                    Book on WhatsApp
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Add-ons & Maintenance Section */}
-      <div className="bg-slate-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            
-            {/* Maintenance */}
-            <div className="bg-slate-800 rounded-3xl p-8 border border-slate-700 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
-              <h3 className="text-2xl font-bold mb-4 flex items-center gap-3">
-                <span className="text-blue-400 drop-shadow-[0_0_5px_rgba(96,165,250,0.8)]">⚙️</span> Monthly Maintenance
-              </h3>
-              <div className="text-3xl font-extrabold text-white mb-6">₹199 – ₹399 <span className="text-lg font-medium text-slate-400">/ month</span></div>
-              <p className="text-slate-300 mb-6">Keep your website fresh, secure, and up-to-date without any hassle. Includes:</p>
-              <ul className="space-y-3 mb-8">
-                {['Updating photos & galleries', 'Adding new offers & banners', 'Updating text content', '24/7 Technical support'].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-slate-300">
-                    <svg className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <a 
-                href={generateWaLink("Hi Aaradh Web, I want to know more about your monthly website maintenance plans.")}
-                target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-xl font-bold transition-colors w-full sm:w-auto justify-center"
-              >
-                Enquire Maintenance
-              </a>
-            </div>
-
-            {/* Add-ons */}
-            <div>
-              <h3 className="text-2xl font-bold mb-6">Boost Your Digital Presence</h3>
-              <p className="text-slate-400 mb-8">Add these powerful services to any website package to get more customers and build your brand identity.</p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {addons.map((addon, idx) => (
-                  <div key={idx} className="bg-slate-800 border border-slate-700 rounded-xl p-5 flex flex-col hover:border-blue-500 transition-colors shadow-lg">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-2xl">{addon.icon}</span>
-                      <h4 className="font-bold">{addon.name}</h4>
-                    </div>
-                    <div className="text-xl font-extrabold text-blue-400 mb-4 drop-shadow-[0_0_5px_rgba(96,165,250,0.5)]">{addon.price}</div>
-                    <a 
-                      href={generateWaLink(`Hi Aaradh Web, I want to add the ${addon.name} (${addon.price}) to my package.`)}
-                      target="_blank" rel="noopener noreferrer"
-                      className="mt-auto text-sm bg-slate-700 hover:bg-gradient-to-r hover:from-green-500 hover:to-green-600 hover:text-white px-4 py-2 rounded-lg font-medium transition-all text-center flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                      Add to Plan
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="bg-slate-950 text-slate-400 py-12 text-center border-t border-slate-900">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-2xl font-bold text-white mb-4">Aaradh Web</div>
-          <p className="mb-6 max-w-md mx-auto">Providing affordable, high-quality digital solutions for local businesses to grow their online presence.</p>
-          <div className="flex justify-center gap-4 mb-8">
-            <a href={`tel:+${WA_NUMBER}`} className="hover:text-white transition-colors">📞 +91 77648 12598</a>
-          </div>
-          <p className="text-sm border-t border-slate-800 pt-8">
-            © {new Date().getFullYear()} Aaradh Web. All rights reserved.
-          </p>
-        </div>
-      </footer>
-
-      {/* CSS For Glow, Glassmorphism, and Animations */}
-      <style dangerouslySetInnerHTML={{__html: `
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #09090b; 
+            color: #fafafa;
+            overflow-x: hidden;
         }
 
-        /* Moving Text Gradient */
-        .glowing-text-animated {
-          background: linear-gradient(
-            to right,
-            #60a5fa 20%, /* blue-400 */
-            #c084fc 30%, /* purple-400 */
-            #ffffff 50%, 
-            #60a5fa 70%,
-            #c084fc 80%
-          );
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-          background-size: 200% auto;
-          animation: shine 4s linear infinite;
-          filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.4));
-        }
-
-        @keyframes shine {
-          to {
-            background-position: 200% center;
-          }
-        }
-
-        /* Glassmorphism Panel */
+        /* Black Glass Aesthetics */
         .glass-panel {
-          background: rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(9, 9, 11, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* Animated Glowing Border Box */
-        .glass-glow-wrapper {
-          position: relative;
-        }
-        
-        .glass-glow-wrapper::before {
-          content: "";
-          position: absolute;
-          inset: -2px;
-          border-radius: 18px; /* Slightly larger than the panel border-radius */
-          background: linear-gradient(
-            45deg, 
-            rgba(59, 130, 246, 0.5), /* blue */
-            rgba(168, 85, 247, 0.5), /* purple */
-            rgba(59, 130, 246, 0.5)
-          );
-          background-size: 200% auto;
-          z-index: -1;
-          animation: shine 3s linear infinite;
-          filter: blur(12px);
+        .glass-card {
+            background: linear-gradient(145deg, rgba(39, 39, 42, 0.4) 0%, rgba(24, 24, 27, 0.6) 100%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Blob Animation for Background Lights */
+        .glass-card-interactive {
+            cursor: pointer;
+        }
+
+        .glass-card-interactive:hover {
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            transform: translateY(-8px) scale(1.02);
+            background: linear-gradient(145deg, rgba(39, 39, 42, 0.7) 0%, rgba(24, 24, 27, 0.9) 100%);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card-interactive:hover .icon-wrapper {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .icon-wrapper {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gradient-text-blue {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Background Blob Animations */
         @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
         }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}} />
+        .animate-blob { animation: blob 15s infinite alternate ease-in-out; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+
+        /* Tier Colors */
+        .tier-starter { border-top: 3px solid #3b82f6; }
+        .tier-standard { border-top: 3px solid #a855f7; }
+        .tier-premium { border-top: 3px solid #f59e0b; }
+
+        .btn-hover-fx { transition: all 0.3s ease; }
+        .btn-hover-fx:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #09090b; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+    </style>
+</head>
+<body class="selection:bg-blue-500/30">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 glass-panel">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer group" onclick="showCategories()">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/40 group-hover:rotate-12 transition-transform duration-300">
+                    <i class="fas fa-layer-group text-white text-sm"></i>
+                </div>
+                <span class="text-xl font-800 tracking-tighter text-white">AARADH<span class="text-blue-500 font-400">WEB</span></span>
+            </div>
+            <a href="https://wa.me/917764812598?text=Hi Aaradh Web, I need a consultation for my business website." target="_blank" class="text-white bg-white/10 hover:bg-white/20 border border-white/10 px-5 py-2 rounded-full transition-all duration-300 text-sm font-semibold flex items-center gap-2 hover:scale-105">
+                <i class="fab fa-whatsapp text-green-400 text-lg"></i> <span class="hidden sm:inline">Let's Talk</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Animated Background Glow Effects -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-[-10%] left-[10%] w-[40vw] h-[40vw] bg-blue-900/20 rounded-full blur-[100px] animate-blob"></div>
+        <div class="absolute top-[20%] right-[-10%] w-[35vw] h-[35vw] bg-purple-900/20 rounded-full blur-[100px] animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-[45vw] h-[45vw] bg-blue-800/10 rounded-full blur-[120px] animate-blob animation-delay-4000"></div>
     </div>
-  );
-}
+
+    <!-- Main Container -->
+    <main class="pt-32 pb-24 px-6 min-h-screen flex flex-col items-center">
+        <!-- App Root (Injected by JS) -->
+        <div id="app-root" class="w-full max-w-7xl relative"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 text-center border-t border-white/5 bg-black/40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-zinc-500 text-sm">© 2024 Aaradh Web Solutions. Empowering Local Businesses.</p>
+            <div class="flex gap-6 text-zinc-600">
+                <span class="text-sm"><i class="fas fa-tools mr-2"></i>Maintenance from ₹199/mo</span>
+                <span class="text-sm"><i class="fas fa-phone mr-2"></i>+91 7764812598</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Full Data for 12 Categories
+        const categories = [
+            {
+                id: "schools", title: "Schools", icon: "fa-school",
+                shortDesc: "Digital campuses for modern education.",
+                desc: "Build trust with parents and students through a digital-first campus experience. A professional website modernizes admissions, showcases facilities, and keeps parents updated effortlessly.",
+                bundles: [
+                    { tier: "starter", name: "Starter", price: "2,999", d: "Perfect for primary schools or playhouses needing a clean digital presence to build local trust.", features: ["4 Professional Pages", "Photo Gallery", "Google Maps Setup", "WhatsApp Direct"] },
+                    { tier: "standard", name: "Standard", price: "5,999", d: "Advanced features for high schools needing formal admission handling and regular updates.", features: ["8 Pages Structure", "Notice Board System", "Admission Forms", "Event Timeline"] },
+                    { tier: "premium", name: "Premium", price: "9,999", d: "The complete digital campus. Manage results, blogs, and student interactions online.", features: ["Online Result Section", "Dynamic News Blog", "6 Months Free Support", "SEO Core Pack"] }
+                ]
+            },
+            {
+                id: "coaching", title: "Coaching Institutes", icon: "fa-graduation-cap",
+                shortDesc: "Turn student results into enrollments.",
+                desc: "Your results are your best marketing tool. We build highly converting websites for coaching centers that highlight top achievers, detail your courses, and capture student enquiries 24/7.",
+                bundles: [
+                    { tier: "starter", name: "Starter", price: "1,999", d: "A high-impact landing page designed specifically to capture leads via WhatsApp.", features: ["Landing Page Design", "Detailed Course List", "WhatsApp Button", "Mobile Friendly"] },
+                    { tier: "standard", name: "Standard", price: "4,999", d: "Dedicated sections for your results, structured course details, and lead capture forms.", features: ["4 Dynamic Pages", "Student Results Grid", "Enquiry Dashboard", "Speed Optimized"] },
+                    { tier: "premium", name: "Premium", price: "7,999", d: "Fully automated registration and video testimonial system for maximum institutional growth.", features: ["Online Reg. Form", "Video Testimonials", "SEO Ranking Pack", "Priority Hosting"] }
+                ]
+            },
+            {
+                id: "restaurants", title: "Restaurants", icon: "fa-utensils",
+                shortDesc: "Make them hungry before they arrive.",
+                desc: "A website is your digital storefront. We create mouth-watering digital experiences for restaurants, allowing customers to view menus, book tables, and even order directly without third-party commission apps.",
+                bundles: [
+                    { tier: "starter", name: "Starter", price: "2,499", d: "QR-ready digital menu that looks stunning on mobile phones. Perfect for cafes.", features: ["Digital Menu Page", "HD Food Gallery", "WhatsApp Ordering", "Contact Details"] },
+                    { tier: "standard", name: "Standard", price: "4,999", d: "Enhance guest experience with direct table reservation tools and full branding.", features: ["5 Page Restaurant Site", "Table Booking Form", "Menu Management", "Social Media Sync"] },
+                    { tier: "premium", name: "Premium", price: "8,999", d: "Full-scale ordering system to bypass high commission delivery apps like Swiggy/Zomato.", features: ["Direct Order System", "Promotions Section", "Fast Load SEO", "Staff Training"] }
+                ]
+            },
+            {
+                id: "cafes", title: "Cafes & Bakeries", icon: "fa-coffee",
+                shortDesc: "Aesthetic sites for aesthetic spots.",
+                desc: "Capture the vibe of your cafe online. We integrate your Instagram feed, showcase your specialty brews and bakes, and make it incredibly easy for locals to find you and order.",
+                bundles: [
+                    { tier: "starter", name: "Starter", price: "2,999", d: "A beautiful, visual-heavy single page site to show off your menu and location.", features: ["Interactive Menu", "Instagram Link", "Cozy Gallery", "Map Integration"] },
+                    { tier: "standard", name: "Standard", price: "5,999", d: "Live Instagram feed integration and table reservation capabilities for busy hours.", features: ["Table Reservation", "Live Insta Feed", "SEO Setup", "Customer Reviews"] },
+                    { tier: "premium", name: "Premium", price: "9,999", d: "The ultimate cafe hub with event listings (open mics) and direct online ordering.", features: ["Online Ordering", "Event & Gig Section", "Premium Aesthetics", "Analytics"] }
+                ]
+            },
+            {
+                id: "hotels", title: "Hotels & Stays", icon: "fa-hotel",
+                shortDesc: "Direct bookings, zero commissions.",
+                desc: "Stop paying massive cuts to MakeMyTrip or Oyo. Build your own brand authority with a premium hotel website featuring high-res room galleries and direct booking enquiries.",
+                bundles: [
+                    { tier: "starter", name: "Starter", price: "3,999", d: "Essential digital brochure to showcase rooms and amenities to potential guests.", features: ["Room Details", "Photo Gallery", "WhatsApp Booking", "Location Guide"] },
+                    { tier: "standard", name: "Standard", price: "7,999", d: "Detailed individual room pages and structured booking enquiry forms for reception.", features: ["Individual Room Pages", "Booking Enquiry Form", "Testimonials", "Nearby Attractions"] },
+                    { tier: "premium", name: "Premium", price: "12,999", d: "Complete digital hospitality solution with special offers and potential payment gateways.", features: ["Online Booking System", "Seasonal Offers Page", "Virtual Tour Link", "Multi-language Ready"] }
+                ]
+            },
+            {
+                id: "clinics", title: "Medical Clinics", icon: "fa-stethoscope",
+                shortDesc: "Digital trust for modern healthcare.",
+                desc: "Patients search for doctors online before visiting. A professional, clean, and fast website establishes medical authority and makes appointment booking seamless for patients in distress.",
+                bundles: [
+                    { tier: "starter", name: "Starter", price: "2,999", d: "A professional doctor profile to handle digital appointments efficiently via WhatsApp.", features: ["Doctor Profile", "Services List", "WhatsApp Booking", "Map Location"] },
+                    { tier: "standard", name: "Standard", price: "5,999", d: "Build authority with verified patient reviews and detailed department information.", features: ["Advanced Appointment", "Patient Review Section", "HD Image Gallery", "Secure Forms"] },
+                    { tier: "premium", name: "Premium", price: "9,999", d: "A healthcare hub with health tips, blogs, and multiple specialist profiles for polyclinics.", features: ["Health Blog Section", "Multi-Doctor Support", "Full Local SEO", "Priority Support"] }
+                ]
+            },
+            {
+                id: "localservices", title: "Local Services", icon: "fa-wrench",
+                shortDesc: "Plumbers, Electricians, AC Repair.",
+                desc: "When an AC breaks, people Google it instantly. We build lightning-fast, highly optimized sites that rank well locally so you get the call first instead of your competitors.",
+                bundles: [
+                    { tier: "starter", name: "Starter", price: "1,499", d: "The 'Call-Now' specialist. Minimal, fast loading, and built for high conversion.", features: ["One-Page Layout", "Service Grid", "Tap-to-Call Link", "WhatsApp Integration"] },
+                    { tier: "standard", name: "Standard", price: "2,999", d: "Professional business site detailing different services and pricing transparency.", features: ["Service Detail Pages", "Price List Table", "Booking Enquiry", "Google Business Link"] },
+                    { tier: "premium", name: "Premium", price: "4,999", d: "Dominant local presence with targeted SEO to appear first on local Google searches.", features: ["SEO Keyword Focus", "Advanced Booking", "Full Image Setup", "1 Year Support"] }
+                ]
+            },
+            {
+                id: "tutors", title: "Home Tutors", icon: "fa-chalkboard-teacher",
+                shortDesc: "Personal branding for educators.",
+                desc: "Stand out from the crowd of private tutors. Showcase your qualifications, teaching methodology, past student success stories, and allow parents to book demo classes easily.",
+                bundles: [
+                    { tier: "starter", name: "Starter", price: "1,999", d: "A clean digital resume that acts as your professional introduction to parents.", features: ["Tutor Profile", "Subjects Taught", "WhatsApp Contact", "Fee Structure"] },
+                    { tier: "standard", name: "Standard", price: "3,999", d: "Build credibility by showcasing past student results and an automated demo booking form.", features: ["Student Results Gallery", "Demo Class Booking", "Study Material Link", "Testimonials"] },
+                    { tier: "premium", name: "Premium", price: "6,999", d: "A comprehensive educator platform with a blog to share study tips and attract organic traffic.", features: ["Blog Section", "Video Intro Embed", "SEO Ready", "Newsletter Setup"] }
+                ]
+            },
+            {
+                id: "gyms", title: "Gyms & Fitness", icon: "fa-dumbbell",
+                shortDesc: "Digital muscle for your fitness brand.",
+                desc: "Showcase your equipment, highlight your expert trainers, and display membership plans clearly. A great gym website motivates people to join before they even step inside.",
+                bundles: [
+                    { tier: "starter", name: "Starter", price: "2,499", d: "High-energy landing page detailing your location, timings, and core membership prices.", features: ["Trainer Profile", "Membership Plans", "Gym Gallery", "WhatsApp Join"] },
+                    { tier: "standard", name: "Standard", price: "4,999", d: "Detailed breakdown of workout programs (Zumba, Yoga, Weights) and contact forms.", features: ["Workout Programs", "Transformation Gallery", "Contact Form", "Diet Tip Section"] },
+                    { tier: "premium", name: "Premium", price: "7,999", d: "Advanced setup with class schedules, trainer booking, and integrated member portals.", features: ["Online Class Booking", "Timetable Integration", "Merch Store Link", "SEO Optimization"] }
+                ]
+            },
+            {
+                id: "salons", title: "Salons & Parlours", icon: "fa-cut",
+                shortDesc: "Glamorous sites for beauty experts.",
+                desc: "Your business is about aesthetics; your website should be too. Display your bridal makeup portfolios, list salon services, and let clients book their pampering sessions online.",
+                bundles: [
+                    { tier: "starter", name: "Starter", price: "2,499", d: "Elegant portfolio site to showcase your best makeup and styling work.", features: ["Services List", "Bridal Gallery", "WhatsApp Appointment", "Location Details"] },
+                    { tier: "standard", name: "Standard", price: "4,999", d: "Structured pricing lists and dedicated pages for special seasonal offers.", features: ["Appointment Form", "Offers Page", "Staff Profiles", "Instagram Sync"] },
+                    { tier: "premium", name: "Premium", price: "7,999", d: "Complete salon management front-end with advanced online booking capabilities.", features: ["Online Booking System", "Customer Portal", "Bridal Packages", "Priority Hosting"] }
+                ]
+            },
+            {
+                id: "realestate", title: "Real Estate Agents", icon: "fa-building",
+                shortDesc: "Sell properties with premium visuals.",
+                desc: "Real estate is a high-ticket game. Look like a top-tier broker with a website that beautifully catalogs properties, captures buyer leads, and integrates with Google Maps.",
+                bundles: [
+                    { tier: "starter", name: "Starter", price: "3,999", d: "Essential listing page for agents moving fast on specific property deals.", features: ["Featured Property", "High-Res Gallery", "WhatsApp Inquiry", "Call Button"] },
+                    { tier: "standard", name: "Standard", price: "6,999", d: "Multi-property management with detailed categorization (Commercial, Residential).", features: ["Property Gallery", "Enquiry Forms", "Location Maps", "Agent Profiles"] },
+                    { tier: "premium", name: "Premium", price: "10,999", d: "High-end real estate portal for agencies with advanced search and virtual tours.", features: ["Advanced Listings", "Search Filters", "Virtual Tour Links", "SEO Pack"] }
+                ]
+            },
+            {
+                id: "retail", title: "Retail Shops", icon: "fa-shopping-bag",
+                shortDesc: "Take your local shop online.",
+                desc: "Whether you sell clothes, electronics, or gifts, having an online catalog expands your reach beyond your street. Let customers browse your stock from their couches.",
+                bundles: [
+                    { tier: "starter", name: "Starter", price: "2,499", d: "A simple, attractive digital catalog showing your latest stock arrivals.", features: ["Product Showcase", "Shop Details", "WhatsApp Order", "Offers Banner"] },
+                    { tier: "standard", name: "Standard", price: "4,999", d: "Organized product categories allowing customers to browse specific items easily.", features: ["Product Categories", "Search Function", "Enquiry Cart", "Social Links"] },
+                    { tier: "premium", name: "Premium", price: "8,999", d: "A lightweight e-commerce setup to take orders and potentially accept payments.", features: ["Simple Online Ordering", "Payment Link Setup", "Inventory Layout", "SEO Ready"] }
+                ]
+            }
+        ];
+
+        const appRoot = document.getElementById('app-root');
+
+        // Render the Grid View HTML
+        function getCategoriesHTML() {
+            let html = `
+                <div class="text-center mb-16 hero-section">
+                    <h1 class="text-4xl md:text-6xl font-800 mb-6 tracking-tight text-white hero-title">
+                        Who are we building for <span class="gradient-text-blue">today?</span>
+                    </h1>
+                    <p class="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto hero-subtitle">
+                        Select your business type below to discover custom web packages designed specifically for your industry's needs.
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 category-grid">
+            `;
+
+            categories.forEach(cat => {
+                html += `
+                    <div onclick="transitionToDetails('${cat.id}')" class="category-card glass-card glass-card-interactive rounded-2xl p-6 flex flex-col items-center text-center group">
+                        <div class="icon-wrapper w-16 h-16 rounded-2xl bg-zinc-800/50 flex items-center justify-center text-zinc-400 text-2xl mb-5 border border-white/5">
+                            <i class="fas ${cat.icon}"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">${cat.title}</h3>
+                        <p class="text-zinc-500 text-sm leading-relaxed">${cat.shortDesc}</p>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            return html;
+        }
+
+        // Render the Details View HTML
+        function getDetailsHTML(id) {
+            const cat = categories.find(c => c.id === id);
+            
+            let html = `
+                <div class="details-container max-w-6xl mx-auto w-full">
+                    <button onclick="transitionToCategories()" class="back-btn mb-8 text-zinc-400 hover:text-white flex items-center gap-2 transition-colors text-sm font-semibold bg-zinc-900/50 py-2 px-4 rounded-full border border-white/5 w-fit hover:bg-zinc-800">
+                        <i class="fas fa-arrow-left"></i> Back to all categories
+                    </button>
+
+                    <div class="details-header glass-card rounded-[2rem] p-8 md:p-12 mb-12 border-l-4 border-l-blue-500">
+                        <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+                            <div class="w-20 h-20 rounded-3xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-4xl border border-blue-500/20 shrink-0">
+                                <i class="fas ${cat.icon}"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-4xl md:text-5xl font-800 text-white mb-4">${cat.title} Websites</h1>
+                                <p class="text-zinc-400 text-lg leading-relaxed max-w-3xl">${cat.desc}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 bundles-grid">
+            `;
+
+            cat.bundles.forEach((bundle, index) => {
+                const isPopular = index === 1;
+                const waMessage = encodeURIComponent(`Hello Aaradh Web, I am interested in the ${bundle.name} Package (₹${bundle.price}) for my ${cat.title} business.`);
+                
+                html += `
+                    <div class="bundle-card glass-card rounded-[2rem] p-8 flex flex-col relative overflow-hidden tier-${bundle.tier}">
+                        ${isPopular ? `
+                            <div class="absolute top-0 right-0 bg-gradient-to-r from-purple-500 to-blue-500 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-8 transform translate-x-8 translate-y-4 rotate-45 shadow-lg z-10">
+                                Most Popular
+                            </div>
+                        ` : ''}
+                        
+                        <div class="mb-6 relative z-10">
+                            <h3 class="text-zinc-400 text-sm font-bold uppercase tracking-widest mb-2">${bundle.name}</h3>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-4xl font-800 text-white">₹${bundle.price}</span>
+                                <span class="text-zinc-500 text-sm">/one-time</span>
+                            </div>
+                        </div>
+
+                        <p class="text-zinc-400 text-sm mb-8 leading-relaxed min-h-[60px] relative z-10">
+                            ${bundle.d}
+                        </p>
+
+                        <div class="flex-grow relative z-10">
+                            <h4 class="text-white text-sm font-bold mb-4 border-b border-white/10 pb-2">What's included:</h4>
+                            <ul class="space-y-4 mb-8">
+                                ${bundle.features.map(f => `
+                                    <li class="flex items-start gap-3 text-sm text-zinc-300">
+                                        <i class="fas fa-check-circle text-blue-500 mt-0.5"></i>
+                                        <span>${f}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+
+                        <a href="https://wa.me/917764812598?text=${waMessage}" target="_blank"
+                           class="btn-hover-fx w-full py-4 rounded-xl ${isPopular ? 'bg-white text-black' : 'bg-zinc-800 text-white border border-zinc-700'} font-bold text-center flex items-center justify-center gap-2 shadow-lg relative z-10 mt-auto">
+                            <i class="fab fa-whatsapp ${isPopular ? 'text-green-600' : 'text-green-400'} text-lg"></i> Select ${bundle.name}
+                        </a>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                    
+                    <div class="addon-box mt-12 glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between border border-dashed border-zinc-700">
+                        <div class="flex items-center gap-4 mb-4 sm:mb-0">
+                            <i class="fas fa-server text-2xl text-zinc-500"></i>
+                            <div>
+                                <h4 class="text-white font-bold">Need Maintenance?</h4>
+                                <p class="text-zinc-400 text-sm">Monthly updates, hosting & support starting at just ₹199/mo.</p>
+                            </div>
+                        </div>
+                        <a href="https://wa.me/917764812598?text=I want to know about your ₹199/mo maintenance plans." target="_blank" class="text-blue-400 hover:text-blue-300 font-semibold text-sm whitespace-nowrap group flex items-center transition-all">
+                            Ask about Add-ons <i class="fas fa-arrow-right ml-1 transform group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+                </div>
+            `;
+            return html;
+        }
+
+        // --- ANIMATION LOGIC --- //
+
+        // Initial Load
+        function showCategories(initial = true) {
+            appRoot.innerHTML = getCategoriesHTML();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // GSAP Entrance Animations
+            const tl = gsap.timeline();
+            
+            tl.fromTo(".hero-title", 
+                { y: 30, opacity: 0 }, 
+                { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
+            )
+            .fromTo(".hero-subtitle", 
+                { y: 20, opacity: 0 }, 
+                { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" },
+                "-=0.5"
+            )
+            .fromTo(".category-card", 
+                { y: 50, opacity: 0, scale: 0.95 }, 
+                { y: 0, opacity: 1, scale: 1, duration: 0.6, stagger: 0.05, ease: "back.out(1.2)" },
+                "-=0.4"
+            );
+        }
+
+        // Transition: Grid -> Details
+        function transitionToDetails(id) {
+            // 1. Animate Out Current Grid
+            gsap.to(".category-card", {
+                y: -20, opacity: 0, scale: 0.95, duration: 0.3, stagger: 0.02, ease: "power2.in",
+                onComplete: () => {
+                    gsap.to(".hero-section", {
+                        opacity: 0, y: -20, duration: 0.2,
+                        onComplete: () => {
+                            // 2. Swap HTML
+                            appRoot.innerHTML = getDetailsHTML(id);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                            // 3. Animate In Details
+                            const tl = gsap.timeline();
+                            tl.fromTo(".back-btn", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4 })
+                              .fromTo(".details-header", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, "-=0.2")
+                              .fromTo(".bundle-card", { opacity: 0, y: 40, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.1, ease: "back.out(1.1)" }, "-=0.3")
+                              .fromTo(".addon-box", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, "-=0.2");
+                        }
+                    });
+                }
+            });
+        }
+
+        // Transition: Details -> Grid
+        function transitionToCategories() {
+            // 1. Animate Out Details
+            gsap.to([".bundle-card", ".addon-box"], {
+                y: 20, opacity: 0, duration: 0.3, stagger: 0.05, ease: "power2.in",
+                onComplete: () => {
+                    gsap.to([".details-header", ".back-btn"], {
+                        opacity: 0, y: 20, duration: 0.2,
+                        onComplete: () => {
+                            // 2. Call the showCategories function which handles the HTML swap and in-animations
+                            showCategories(false);
+                        }
+                    });
+                }
+            });
+        }
+
+        // Start App
+        document.addEventListener("DOMContentLoaded", () => {
+            showCategories();
+        });
+
+    </script>
+</body>
+</html>
 
 
